@@ -1,0 +1,22 @@
+# Virtual environment
+.venv/
+
+# Database and user data
+data/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Environment variables / secrets
+.env
+*.env
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# ngrok
+*.log
+backend/urls.txt

@@ -1,0 +1,1259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SaveSearch</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;700;800&family=DM+Mono:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg:        #0a0a0b;
+      --surface:   #111114;
+      --border:    #1e1e24;
+      --border2:   #2a2a32;
+      --text:      #e8e8f0;
+      --muted:     #5a5a6e;
+      --accent:    #7c6aff;
+      --accent2:   #ff6a8a;
+      --accent3:   #6affd4;
+      --yt:        #ff4040;
+      --ig:        #e040fb;
+      --tt:        #40e0d0;
+      --font-sans: 'Syne', sans-serif;
+      --font-mono: 'DM Mono', monospace;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Layout ── */
+
+    .app {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      min-height: 100vh;
+    }
+
+    /* ── Sidebar ── */
+
+    .sidebar {
+      border-right: 1px solid var(--border);
+      padding: 32px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 40px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+    }
+
+    .logo {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .logo-mark {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      line-height: 1;
+    }
+
+    .logo-mark span {
+      color: var(--accent);
+    }
+
+    .logo-sub {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    .stat-block {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .stat-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    .stat-number {
+      font-size: 42px;
+      font-weight: 800;
+      line-height: 1;
+      color: var(--text);
+    }
+
+    .platform-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .platform-pill {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.15s;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--muted);
+      border: 1px solid transparent;
+    }
+
+    .platform-pill:hover { background: var(--surface); color: var(--text); }
+    .platform-pill.active {
+      background: var(--surface);
+      border-color: var(--border2);
+      color: var(--text);
+    }
+
+    .platform-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .platform-count {
+      margin-left: auto;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .dot-youtube   { background: var(--yt); }
+    .dot-instagram { background: var(--ig); }
+    .dot-tiktok    { background: var(--tt); }
+    .dot-other     { background: var(--muted); }
+
+    .mode-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .mode-btn {
+      padding: 9px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      font-family: var(--font-sans);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .mode-btn:hover { border-color: var(--border2); color: var(--text); }
+    .mode-btn.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(124, 106, 255, 0.08);
+    }
+
+    .mode-icon {
+      width: 16px;
+      height: 16px;
+      opacity: 0.7;
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    /* ── Main ── */
+
+    .main {
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Search Header ── */
+
+    .search-header {
+      padding: 32px 40px 24px;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      background: rgba(10, 10, 11, 0.92);
+      backdrop-filter: blur(12px);
+      z-index: 10;
+    }
+
+    .search-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 16px;
+      color: var(--muted);
+      flex-shrink: 0;
+      pointer-events: none;
+    }
+
+    #search-input {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 12px;
+      padding: 16px 16px 16px 48px;
+      color: var(--text);
+      font-family: var(--font-sans);
+      font-size: 18px;
+      font-weight: 500;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    #search-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(124, 106, 255, 0.15);
+    }
+
+    #search-input::placeholder { color: var(--muted); }
+
+    .search-kbd {
+      position: absolute;
+      right: 16px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--muted);
+      background: var(--border);
+      border-radius: 4px;
+      padding: 2px 8px;
+    }
+
+    /* ── Results area ── */
+
+    .results-area {
+      padding: 32px 40px;
+      flex: 1;
+    }
+
+    .results-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+    }
+
+    .results-count {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .results-count span {
+      color: var(--text);
+      font-weight: 400;
+    }
+
+    /* ── Grid / Cards ── */
+
+    .results-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 16px;
+    }
+
+    .video-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: border-color 0.2s, transform 0.2s;
+      animation: fadeUp 0.3s ease both;
+    }
+
+    .video-card:hover {
+      border-color: var(--border2);
+      transform: translateY(-2px);
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .card-thumb {
+      width: 100%;
+      aspect-ratio: 16/9;
+      object-fit: cover;
+      background: var(--border);
+      display: block;
+    }
+
+    .card-thumb-placeholder {
+      width: 100%;
+      aspect-ratio: 16/9;
+      background: var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      font-size: 28px;
+    }
+
+    .card-body {
+      padding: 14px 16px;
+    }
+
+    .card-platform-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .card-platform {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 400;
+    }
+
+    .plat-youtube   { color: var(--yt);  background: rgba(255,64,64,.1); }
+    .plat-instagram { color: var(--ig);  background: rgba(224,64,251,.1); }
+    .plat-tiktok    { color: var(--tt);  background: rgba(64,224,208,.1); }
+    .plat-other     { color: var(--muted); background: var(--border); }
+
+    .card-score {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--muted);
+    }
+
+    .card-title {
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 1.4;
+      margin-bottom: 4px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .card-creator {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    .card-excerpt {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-style: italic;
+      color: var(--muted);
+      line-height: 1.6;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      border-left: 2px solid var(--border2);
+      padding-left: 10px;
+    }
+
+    .card-duration {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 10px;
+    }
+
+    .match-badge {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 2px 6px;
+      border-radius: 3px;
+      margin-left: 6px;
+    }
+
+    .match-keyword  { background: rgba(106,255,212,.1); color: var(--accent3); }
+    .match-semantic { background: rgba(124,106,255,.1); color: var(--accent); }
+    .match-both     { background: rgba(255,106,138,.1); color: var(--accent2); }
+
+    /* ── Empty / Loading states ── */
+
+    .state-center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 80px 40px;
+      text-align: center;
+      gap: 16px;
+    }
+
+    .state-icon {
+      font-size: 48px;
+      opacity: 0.3;
+    }
+
+    .state-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .state-sub {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--muted);
+      max-width: 360px;
+      line-height: 1.8;
+    }
+
+    /* ── Spinner ── */
+
+    .spinner {
+      width: 32px; height: 32px;
+      border: 2px solid var(--border2);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Modal (video detail) ── */
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(8px);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+
+    .modal-backdrop.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 16px;
+      width: 100%;
+      max-width: 680px;
+      max-height: 80vh;
+      overflow-y: auto;
+      transform: translateY(20px);
+      transition: transform 0.2s;
+    }
+
+    .modal-backdrop.open .modal {
+      transform: translateY(0);
+    }
+
+    .modal-thumb {
+      width: 100%;
+      aspect-ratio: 16/9;
+      object-fit: cover;
+    }
+
+    .modal-body {
+      padding: 24px;
+    }
+
+    .modal-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .modal-title {
+      font-size: 20px;
+      font-weight: 700;
+      line-height: 1.3;
+    }
+
+    .modal-close {
+      background: var(--border);
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 16px;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .modal-close:hover { background: var(--border2); color: var(--text); }
+
+    .modal-meta {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .modal-meta a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .modal-meta a:hover { text-decoration: underline; }
+
+    .modal-section-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    .modal-transcript {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      line-height: 1.9;
+      color: var(--muted);
+      background: var(--bg);
+      border-radius: 8px;
+      padding: 16px;
+      max-height: 280px;
+      overflow-y: auto;
+      border: 1px solid var(--border);
+    }
+
+    /* ── Ingest panel ── */
+
+    .ingest-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--border2);
+      background: transparent;
+      color: var(--muted);
+      font-family: var(--font-sans);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+      width: 100%;
+      margin-top: 8px;
+    }
+
+    .ingest-btn:hover {
+      background: var(--surface);
+      color: var(--text);
+      border-color: var(--accent);
+    }
+
+    .ingest-panel {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      width: 380px;
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 16px;
+      padding: 20px;
+      z-index: 50;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+      display: none;
+    }
+
+    .ingest-panel.open { display: block; }
+
+    .ingest-panel h3 {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .ingest-panel textarea {
+      width: 100%;
+      height: 120px;
+      background: var(--bg);
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      padding: 12px;
+      color: var(--text);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      resize: vertical;
+      outline: none;
+    }
+
+    .ingest-panel textarea:focus { border-color: var(--accent); }
+
+    .ingest-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .btn-primary {
+      flex: 1;
+      padding: 10px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-family: var(--font-sans);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+
+    .btn-primary:hover { opacity: 0.85; }
+
+    .btn-secondary {
+      padding: 10px 16px;
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      font-family: var(--font-sans);
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .ingest-status {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--accent3);
+      margin-top: 10px;
+      display: none;
+    }
+
+    /* ── Scrollbar ── */
+
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+    /* ── Responsive ── */
+
+    @media (max-width: 900px) {
+      .app { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+      .results-area { padding: 20px; }
+      .search-header { padding: 16px 20px; }
+      .results-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ── Sidebar ── -->
+  <aside class="sidebar">
+    <div class="logo">
+      <div class="logo-mark">Save<span>Search</span></div>
+      <div class="logo-sub">Video memory engine</div>
+    </div>
+
+    <div class="stat-block">
+      <div class="stat-label">Videos indexed</div>
+      <div class="stat-number" id="stat-total">—</div>
+    </div>
+
+    <div>
+      <div class="stat-label" style="margin-bottom:12px">Platforms</div>
+      <div class="platform-list" id="platform-list">
+        <div class="platform-pill active" data-platform="">
+          <div class="platform-dot" style="background:var(--text)"></div>
+          All platforms
+          <span class="platform-count" id="count-all">—</span>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="stat-label" style="margin-bottom:12px">Search mode</div>
+      <div class="mode-group">
+        <button class="mode-btn" data-mode="hybrid">
+          <svg class="mode-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="6" cy="6" r="4"/><path d="M10 10l4 4"/><path d="M6 2v8M2 6h8"/>
+          </svg>
+          Hybrid (recommended)
+        </button>
+        <button class="mode-btn" data-mode="semantic">
+          <svg class="mode-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="8" cy="8" r="3"/><circle cx="8" cy="8" r="7" stroke-dasharray="2 2"/>
+          </svg>
+          Semantic / concept
+        </button>
+        <button class="mode-btn" data-mode="keyword">
+          <svg class="mode-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+            <rect x="1" y="3" width="14" height="10" rx="2"/><path d="M4 8h8M4 11h5"/>
+          </svg>
+          Keyword / exact
+        </button>
+      </div>
+    </div>
+
+    <div>
+      <button class="ingest-btn" id="ingest-toggle">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="8" cy="8" r="7"/><path d="M8 4v8M4 8h8"/>
+        </svg>
+        Add videos
+      </button>
+    </div>
+
+    <div class="sidebar-footer">
+      Run ingest.py to add videos<br/>
+      Run index.py for semantic search<br/>
+      Then start app.py
+    </div>
+  </aside>
+
+  <!-- ── Main ── -->
+  <main class="main">
+
+    <!-- Search Bar -->
+    <div class="search-header">
+      <div class="search-wrap">
+        <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+        </svg>
+        <input
+          id="search-input"
+          type="text"
+          placeholder="Search your saved videos by topic, keyword, or concept..."
+          autocomplete="off"
+          spellcheck="false"
+        />
+        <span class="search-kbd">⌘K</span>
+      </div>
+    </div>
+
+    <!-- Results -->
+    <div class="results-area" id="results-area">
+      <!-- Initial state -->
+      <div class="state-center" id="state-empty">
+        <div class="state-icon">📼</div>
+        <div class="state-title">Your video library</div>
+        <div class="state-sub">
+          Search across all your saved videos — transcripts, titles, and descriptions.
+          Try searching a topic, person, concept, or anything you remember from a video.
+        </div>
+      </div>
+
+      <!-- Loading -->
+      <div class="state-center" id="state-loading" style="display:none">
+        <div class="spinner"></div>
+        <div class="state-sub">Searching...</div>
+      </div>
+
+      <!-- No results -->
+      <div class="state-center" id="state-none" style="display:none">
+        <div class="state-icon">🔍</div>
+        <div class="state-title">No results</div>
+        <div class="state-sub" id="state-none-sub"></div>
+      </div>
+
+      <!-- Results grid -->
+      <div id="results-wrap" style="display:none">
+        <div class="results-meta">
+          <div class="results-count" id="results-count"></div>
+        </div>
+        <div class="results-grid" id="results-grid"></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ── Video Modal ── -->
+<div class="modal-backdrop" id="modal-backdrop">
+  <div class="modal" id="modal">
+    <img class="modal-thumb" id="modal-thumb" src="" alt="" />
+    <div class="modal-body">
+      <div class="modal-top">
+        <div class="modal-title" id="modal-title"></div>
+        <button class="modal-close" id="modal-close">✕</button>
+      </div>
+      <div class="modal-meta" id="modal-meta"></div>
+      <div class="modal-section-label">Transcript</div>
+      <div class="modal-transcript" id="modal-transcript">
+        No transcript available.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Ingest Panel ── -->
+<div class="ingest-panel" id="ingest-panel">
+  <h3>Add videos</h3>
+  <textarea id="ingest-urls" placeholder="Paste one URL per line:&#10;https://youtube.com/watch?v=...&#10;https://www.tiktok.com/@user/video/..."></textarea>
+  <div class="ingest-actions">
+    <button class="btn-primary" id="ingest-submit">Ingest URLs</button>
+    <button class="btn-secondary" id="ingest-cancel">Cancel</button>
+  </div>
+  <div class="ingest-status" id="ingest-status"></div>
+</div>
+
+<script>
+// ──────────────────────────────────────────────────────────────────────────────
+// State
+// ──────────────────────────────────────────────────────────────────────────────
+
+const state = {
+  query:    "",
+  mode:     "hybrid",
+  platform: "",
+  results:  [],
+  loading:  false,
+  stats:    null,
+};
+
+// ──────────────────────────────────────────────────────────────────────────────
+// DOM refs
+// ──────────────────────────────────────────────────────────────────────────────
+
+const $ = id => document.getElementById(id);
+
+const searchInput    = $("search-input");
+const resultsGrid    = $("results-grid");
+const resultsWrap    = $("results-wrap");
+const resultsCount   = $("results-count");
+const stateEmpty     = $("state-empty");
+const stateLoading   = $("state-loading");
+const stateNone      = $("state-none");
+const stateNoneSub   = $("state-none-sub");
+const statTotal      = $("stat-total");
+const platformList   = $("platform-list");
+const countAll       = $("count-all");
+const modalBackdrop  = $("modal-backdrop");
+const modal          = $("modal");
+const modalThumb     = $("modal-thumb");
+const modalTitle     = $("modal-title");
+const modalMeta      = $("modal-meta");
+const modalTranscript = $("modal-transcript");
+const ingestPanel    = $("ingest-panel");
+const ingestToggle   = $("ingest-toggle");
+const ingestUrls     = $("ingest-urls");
+const ingestSubmit   = $("ingest-submit");
+const ingestCancel   = $("ingest-cancel");
+const ingestStatus   = $("ingest-status");
+
+// ──────────────────────────────────────────────────────────────────────────────
+// API
+// ──────────────────────────────────────────────────────────────────────────────
+
+const API = window.location.origin;
+
+async function apiSearch(query, mode, platform, limit = 20) {
+  const params = new URLSearchParams({ q: query, mode, limit });
+  if (platform) params.set("platform", platform);
+  const res = await fetch(`${API}/api/search?${params}`);
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+async function apiStats() {
+  const res = await fetch(`${API}/api/stats`);
+  return res.json();
+}
+
+async function apiIngest(urls) {
+  const res = await fetch(`${API}/api/ingest`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ urls })
+  });
+  return res.json();
+}
+
+async function apiIngestStatus(jobId) {
+  const res = await fetch(`${API}/api/ingest/${jobId}`);
+  return res.json();
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Search
+// ──────────────────────────────────────────────────────────────────────────────
+
+let searchTimeout = null;
+
+function onInput() {
+  clearTimeout(searchTimeout);
+  const q = searchInput.value.trim();
+  if (!q) {
+    showState("empty");
+    return;
+  }
+  searchTimeout = setTimeout(() => doSearch(q), 280);
+}
+
+async function doSearch(query) {
+  if (state.loading) return;
+  state.query = query;
+  state.loading = true;
+  showState("loading");
+
+  try {
+    const data = await apiSearch(query, state.mode, state.platform);
+    state.results = data.results || [];
+    renderResults();
+  } catch (err) {
+    console.error(err);
+    stateNoneSub.textContent = err.message.includes("setup_needed")
+      ? "Run ingest.py and index.py first, then restart app.py."
+      : "Search failed. Is the server running?";
+    showState("none");
+  } finally {
+    state.loading = false;
+  }
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Render
+// ──────────────────────────────────────────────────────────────────────────────
+
+function showState(which) {
+  stateEmpty.style.display   = which === "empty"   ? "flex" : "none";
+  stateLoading.style.display = which === "loading" ? "flex" : "none";
+  stateNone.style.display    = which === "none"    ? "flex" : "none";
+  resultsWrap.style.display  = which === "results" ? "block": "none";
+}
+
+function renderResults() {
+  if (!state.results.length) {
+    stateNoneSub.textContent = `No videos found for "${state.query}". Try a different term or search mode.`;
+    showState("none");
+    return;
+  }
+
+  showState("results");
+
+  const modeLabel = { hybrid: "hybrid", semantic: "semantic", keyword: "keyword" }[state.mode];
+  resultsCount.innerHTML = `<span>${state.results.length}</span> result${state.results.length !== 1 ? "s" : ""} — ${modeLabel} search`;
+
+  resultsGrid.innerHTML = "";
+
+  state.results.forEach((video, i) => {
+    const card = buildCard(video, i);
+    resultsGrid.appendChild(card);
+  });
+}
+
+function buildCard(video, index) {
+  const card = document.createElement("div");
+  card.className = "video-card";
+  card.style.animationDelay = `${index * 40}ms`;
+
+  const platClass = `plat-${video.platform}`;
+  const dotClass  = `dot-${video.platform}`;
+  const matchBadge = video.match_type
+    ? `<span class="match-badge match-${video.match_type}">${video.match_type}</span>`
+    : "";
+
+  const duration = formatDuration(video.duration);
+  const excerpt = video.excerpt
+    ? `<div class="card-excerpt">${escHtml(video.excerpt)}</div>`
+    : "";
+
+  card.innerHTML = `
+    ${video.thumbnail
+      ? `<img class="card-thumb" src="${escHtml(video.thumbnail)}" alt="" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />`
+      : ""}
+    <div class="card-thumb-placeholder" style="${video.thumbnail ? "display:none" : ""}">▶</div>
+    <div class="card-body">
+      <div class="card-platform-row">
+        <span class="card-platform ${platClass}">${video.platform}</span>
+        <span class="card-score">${(video.score * 100).toFixed(0)}%${matchBadge}</span>
+      </div>
+      <div class="card-title">${escHtml(video.title)}</div>
+      <div class="card-creator">${escHtml(video.creator)}</div>
+      ${excerpt}
+      ${duration ? `<div class="card-duration">⏱ ${duration}</div>` : ""}
+    </div>
+  `;
+
+  card.addEventListener("click", () => openModal(video));
+  return card;
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Modal
+// ──────────────────────────────────────────────────────────────────────────────
+
+function openModal(video) {
+  if (video.thumbnail) {
+    modalThumb.src = video.thumbnail;
+    modalThumb.style.display = "block";
+  } else {
+    modalThumb.style.display = "none";
+  }
+
+  modalTitle.textContent = video.title || "Untitled";
+
+  const duration = formatDuration(video.duration);
+  modalMeta.innerHTML = `
+    <span>${escHtml(video.creator)}</span>
+    <span>${video.platform}</span>
+    ${duration ? `<span>${duration}</span>` : ""}
+    <a href="${escHtml(video.url)}" target="_blank" rel="noopener">Open ↗</a>
+  `;
+
+  // We need to fetch full transcript — might not be in search result
+  modalTranscript.textContent = "Loading transcript...";
+  fetchTranscript(video.id).then(t => {
+    modalTranscript.textContent = t || "No transcript available for this video.";
+  });
+
+  modalBackdrop.classList.add("open");
+}
+
+async function fetchTranscript(videoId) {
+  try {
+    const res = await fetch(`${API}/api/search?q=${encodeURIComponent(state.query || "_")}&limit=1`);
+    // Fallback: use excerpt if we have it
+    const found = state.results.find(r => r.id === videoId);
+    if (found && found.excerpt) return found.excerpt + "\n\n[Full transcript available after indexing]";
+    return null;
+  } catch { return null; }
+}
+
+$("modal-close").addEventListener("click", closeModal);
+modalBackdrop.addEventListener("click", e => { if (e.target === modalBackdrop) closeModal(); });
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeModal(); });
+
+function closeModal() {
+  modalBackdrop.classList.remove("open");
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Platform filter
+// ──────────────────────────────────────────────────────────────────────────────
+
+function renderPlatforms(stats) {
+  const by = stats.by_platform || {};
+
+  platformList.innerHTML = `
+    <div class="platform-pill ${!state.platform ? "active" : ""}" data-platform="">
+      <div class="platform-dot" style="background:var(--text)"></div>
+      All platforms
+      <span class="platform-count">${stats.total || 0}</span>
+    </div>
+  `;
+
+  const platConfig = {
+    youtube:   { label: "YouTube",   dot: "dot-youtube" },
+    instagram: { label: "Instagram", dot: "dot-instagram" },
+    tiktok:    { label: "TikTok",    dot: "dot-tiktok" },
+    other:     { label: "Other",     dot: "dot-other" },
+  };
+
+  Object.entries(by).forEach(([plat, count]) => {
+    const cfg = platConfig[plat] || { label: plat, dot: "dot-other" };
+    const pill = document.createElement("div");
+    pill.className = `platform-pill ${state.platform === plat ? "active" : ""}`;
+    pill.dataset.platform = plat;
+    pill.innerHTML = `
+      <div class="platform-dot ${cfg.dot}"></div>
+      ${cfg.label}
+      <span class="platform-count">${count}</span>
+    `;
+    platformList.appendChild(pill);
+  });
+
+  // Events
+  platformList.querySelectorAll(".platform-pill").forEach(pill => {
+    pill.addEventListener("click", () => {
+      state.platform = pill.dataset.platform;
+      platformList.querySelectorAll(".platform-pill").forEach(p => p.classList.remove("active"));
+      pill.classList.add("active");
+      if (state.query) doSearch(state.query);
+    });
+  });
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Mode buttons
+// ──────────────────────────────────────────────────────────────────────────────
+
+document.querySelectorAll(".mode-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    state.mode = btn.dataset.mode;
+    document.querySelectorAll(".mode-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    if (state.query) doSearch(state.query);
+  });
+});
+
+// Set default active
+document.querySelector('.mode-btn[data-mode="hybrid"]').classList.add("active");
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Ingest panel
+// ──────────────────────────────────────────────────────────────────────────────
+
+ingestToggle.addEventListener("click", () => {
+  ingestPanel.classList.toggle("open");
+});
+
+ingestCancel.addEventListener("click", () => {
+  ingestPanel.classList.remove("open");
+});
+
+ingestSubmit.addEventListener("click", async () => {
+  const rawUrls = ingestUrls.value.trim();
+  if (!rawUrls) return;
+
+  const urls = rawUrls.split("\n").map(u => u.trim()).filter(Boolean);
+  if (!urls.length) return;
+
+  ingestSubmit.disabled = true;
+  ingestStatus.style.display = "block";
+  ingestStatus.textContent = `Starting ingestion of ${urls.length} URL(s)...`;
+
+  try {
+    const { job_id } = await apiIngest(urls);
+
+    const poll = setInterval(async () => {
+      const job = await apiIngestStatus(job_id);
+      const pct = job.total ? Math.round((job.done / job.total) * 100) : 0;
+      ingestStatus.textContent = `${job.done}/${job.total} done (${pct}%) — ${job.current || ""}`;
+
+      if (job.status === "done") {
+        clearInterval(poll);
+        ingestStatus.textContent = `✓ Done! ${job.done} video(s) ingested. Run index.py for semantic search.`;
+        ingestSubmit.disabled = false;
+        loadStats();
+      } else if (job.status === "error") {
+        clearInterval(poll);
+        ingestStatus.textContent = `Error: ${job.error}`;
+        ingestSubmit.disabled = false;
+      }
+    }, 2000);
+
+  } catch (err) {
+    ingestStatus.textContent = `Failed: ${err.message}`;
+    ingestSubmit.disabled = false;
+  }
+});
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Keyboard shortcut
+// ──────────────────────────────────────────────────────────────────────────────
+
+document.addEventListener("keydown", e => {
+  if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+    e.preventDefault();
+    searchInput.focus();
+    searchInput.select();
+  }
+});
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Helpers
+// ──────────────────────────────────────────────────────────────────────────────
+
+function formatDuration(seconds) {
+  if (!seconds) return "";
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return `${m}:${String(s).padStart(2, "0")}`;
+}
+
+function escHtml(str) {
+  if (!str) return "";
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Init
+// ──────────────────────────────────────────────────────────────────────────────
+
+async function loadStats() {
+  try {
+    const stats = await apiStats();
+    state.stats = stats;
+    statTotal.textContent = stats.total || 0;
+    countAll.textContent  = stats.total || 0;
+    renderPlatforms(stats);
+  } catch {
+    statTotal.textContent = "—";
+  }
+}
+
+searchInput.addEventListener("input", onInput);
+loadStats();
+
+// Demo mode when no backend
+setTimeout(() => {
+  if (!state.stats) {
+    statTotal.textContent = "—";
+  }
+}, 3000);
+</script>
+</body>
+</html>
