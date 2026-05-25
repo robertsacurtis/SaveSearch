@@ -183,11 +183,14 @@ def api_ingest():
     def run_ingest():
         # Import here to avoid loading Whisper at startup
         try:
+            backend_dir = str(Path(__file__).parent)
+            if backend_dir not in sys.path:
+                sys.path.insert(0, backend_dir)
             from ingest import init_db, process_url
-        except ImportError:
+        except ImportError as ie:
             with job_lock:
                 ingest_jobs[job_id]["status"] = "error"
-                ingest_jobs[job_id]["error"] = "ingest module not found"
+                ingest_jobs[job_id]["error"] = f"ingest module not found: {ie}"
             return
 
         conn = init_db()
