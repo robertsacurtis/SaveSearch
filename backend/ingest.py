@@ -22,8 +22,10 @@ try:
 except ImportError:
     raise ImportError("Run: pip install faster-whisper")
 
-DB_PATH = Path("data/videos.db")
-AUDIO_DIR = Path("data/audio_temp")
+import os
+DATA_DIR = Path(os.environ.get("DATA_DIR", "data"))
+DB_PATH = DATA_DIR / "videos.db"
+AUDIO_DIR = DATA_DIR / "audio_temp"
 
 _whisper_model = None
 _whisper_lock = threading.Lock()
