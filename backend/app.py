@@ -237,14 +237,36 @@ def api_debug():
     from pathlib import Path
     data_dir = os.environ.get("DATA_DIR", "data")
     db_path = Path(data_dir) / "videos.db"
+
+    try:
+        import ingest as ing
+        ingest_db = str(ing.DB_PATH)
+        ingest_data = str(ing.DATA_DIR)
+    except Exception as e:
+        ingest_db = f"error: {e}"
+        ingest_data = "error"
+
+    row_count = 0
+    try:
+        import sqlite3
+        conn = sqlite3.connect(str(db_path))
+        row_count = conn.execute("SELECT COUNT(*) FROM videos").fetchone()[0]
+        conn.close()
+    except Exception as e:
+        row_count = str(e)
+
     return jsonify({
         "DATA_DIR": data_dir,
         "db_path": str(db_path),
         "db_exists": db_path.exists(),
         "db_size": db_path.stat().st_size if db_path.exists() else 0,
+        "db_row_count": row_count,
+        "ingest_DB_PATH": ingest_db,
+        "ingest_DATA_DIR": ingest_data,
         "cwd": os.getcwd(),
         "files_in_data": [str(f) for f in Path(data_dir).iterdir()] if Path(data_dir).exists() else [],
     })
+
 
 
 # ─── Main ────────────────────────────────────────────────────────────────────────
