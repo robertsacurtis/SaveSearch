@@ -229,6 +229,24 @@ def api_ingest_status(job_id):
     return jsonify(job)
 
 
+# ─── Debug ───────────────────────────────────────────────────────────────────────
+
+@app.route("/api/debug")
+def api_debug():
+    import os
+    from pathlib import Path
+    data_dir = os.environ.get("DATA_DIR", "data")
+    db_path = Path(data_dir) / "videos.db"
+    return jsonify({
+        "DATA_DIR": data_dir,
+        "db_path": str(db_path),
+        "db_exists": db_path.exists(),
+        "db_size": db_path.stat().st_size if db_path.exists() else 0,
+        "cwd": os.getcwd(),
+        "files_in_data": [str(f) for f in Path(data_dir).iterdir()] if Path(data_dir).exists() else [],
+    })
+
+
 # ─── Main ────────────────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
