@@ -193,13 +193,13 @@ def api_ingest():
                 ingest_jobs[job_id]["error"] = f"ingest module not found: {ie}"
             return
 
-        conn = init_db()
+        init_db()
         for url in urls:
             with job_lock:
                 ingest_jobs[job_id]["current"] = url
 
             try:
-                process_url(url, conn, whisper_model=whisper_model)
+                process_url(url, whisper_model=whisper_model)
                 with job_lock:
                     ingest_jobs[job_id]["done"] += 1
             except Exception as e:
@@ -207,7 +207,6 @@ def api_ingest():
                     ingest_jobs[job_id]["errors"] += 1
                 app.logger.error(f"Ingest error for {url}: {e}")
 
-        conn.close()
 
         with job_lock:
             ingest_jobs[job_id]["status"] = "done"
