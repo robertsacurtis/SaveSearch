@@ -8,6 +8,7 @@ import tempfile
 import sqlite3
 import threading
 from pathlib import Path
+import os
 from datetime import datetime, timezone
 from tqdm import tqdm
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -22,7 +23,6 @@ try:
 except ImportError:
     raise ImportError("Run: pip install faster-whisper")
 
-import os
 DATA_DIR = Path(os.environ.get("DATA_DIR", "data"))
 DB_PATH = DATA_DIR / "videos.db"
 AUDIO_DIR = DATA_DIR / "audio_temp"

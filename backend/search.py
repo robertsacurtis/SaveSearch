@@ -18,15 +18,16 @@ Usage (CLI):
 """
 
 import sqlite3
+import os
 import argparse
 import json
 from pathlib import Path
 from typing import Literal
 
-import os
 DATA_DIR = Path(os.environ.get("DATA_DIR", "data"))
 DB_PATH = DATA_DIR / "videos.db"
 CHROMA_DIR = DATA_DIR / "chroma"
+
 
 # ─── Database Connection ────────────────────────────────────────────────────────
 

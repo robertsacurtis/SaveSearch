@@ -13,9 +13,9 @@ Usage:
 import sqlite3
 import argparse
 from pathlib import Path
+import os
 from tqdm import tqdm
 
-import os
 DATA_DIR = Path(os.environ.get("DATA_DIR", "data"))
 DB_PATH = DATA_DIR / "videos.db"
 CHROMA_DIR = DATA_DIR / "chroma"
