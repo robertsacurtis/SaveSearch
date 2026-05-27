@@ -98,13 +98,36 @@ def detect_platform(url):
     return "other"
 
 
-def extract_metadata(url):
-    ydl_opts = {
+def get_cookie_file():
+    """Write YouTube cookies from env var to a temp file if available."""
+    cookies = os.environ.get("YOUTUBE_COOKIES", "").strip()
+    if not cookies:
+        return None
+    cookie_path = DATA_DIR / "yt_cookies.txt"
+    cookie_path.parent.mkdir(parents=True, exist_ok=True)
+    cookie_path.write_text(cookies)
+    return str(cookie_path)
+
+
+def get_ydl_opts(extra=None):
+    """Build yt-dlp options, adding cookies if available."""
+    opts = {
         "quiet": True,
         "no_warnings": True,
+    }
+    cookie_file = get_cookie_file()
+    if cookie_file:
+        opts["cookiefile"] = cookie_file
+    if extra:
+        opts.update(extra)
+    return opts
+
+
+def extract_metadata(url):
+    ydl_opts = get_ydl_opts({
         "skip_download": True,
         "extract_flat": False,
-    }
+    })
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=False)
@@ -117,7 +140,7 @@ def extract_metadata(url):
 def download_audio(url, output_path):
     AUDIO_DIR.mkdir(parents=True, exist_ok=True)
     out_template = str(output_path / "%(id)s.%(ext)s")
-    ydl_opts = {
+    ydl_opts = get_ydl_opts({
         "format": "bestaudio/best",
         "outtmpl": out_template,
         "postprocessors": [{
@@ -125,9 +148,7 @@ def download_audio(url, output_path):
             "preferredcodec": "mp3",
             "preferredquality": "128",
         }],
-        "quiet": True,
-        "no_warnings": True,
-    }
+    })
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=True)
