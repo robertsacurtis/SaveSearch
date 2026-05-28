@@ -99,7 +99,6 @@ def detect_platform(url):
 
 
 def get_cookie_file():
-    """Write YouTube cookies from env var to a temp file if available."""
     cookies = os.environ.get("YOUTUBE_COOKIES", "").strip()
     if not cookies:
         return None
@@ -109,8 +108,24 @@ def get_cookie_file():
     return str(cookie_path)
 
 
+def get_proxy():
+    """Pick a random proxy from WEBSHARE_PROXIES env var."""
+    import random
+    proxies_raw = os.environ.get("WEBSHARE_PROXIES", "").strip()
+    if not proxies_raw:
+        return None
+    lines = [l.strip() for l in proxies_raw.splitlines() if l.strip()]
+    if not lines:
+        return None
+    line = random.choice(lines)
+    parts = line.split(":")
+    if len(parts) != 4:
+        return None
+    ip, port, user, password = parts
+    return f"http://{user}:{password}@{ip}:{port}"
+
+
 def get_ydl_opts(extra=None):
-    """Build yt-dlp options, adding cookies if available."""
     opts = {
         "quiet": True,
         "no_warnings": True,
@@ -118,6 +133,10 @@ def get_ydl_opts(extra=None):
     cookie_file = get_cookie_file()
     if cookie_file:
         opts["cookiefile"] = cookie_file
+    proxy = get_proxy()
+    if proxy:
+        opts["proxy"] = proxy
+        print(f"  Using proxy: {proxy.split('@')[1]}")
     if extra:
         opts.update(extra)
     return opts
